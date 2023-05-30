@@ -9,14 +9,7 @@ const data = [
   { id: 4, name: "Contact", url: "/contact" },
 ];
 
-const subMenuData = [
-  { id: 1, name: "Jordan", doc_count: 11 },
-  { id: 2, name: "Sneakers", doc_count: 8 },
-  { id: 3, name: "Running shoes", doc_count: 64 },
-  { id: 4, name: "Football shoes", doc_count: 107 },
-];
-
-const Menu = ({ showCatMenu, setShowCatMenu }) => {
+const Menu = ({ showCatMenu, setShowCatMenu, categories }) => {
   return (
     <ul className="items-center hidden gap-8 font-medium text-black md:flex">
       {data.map((item) => {
@@ -32,12 +25,12 @@ const Menu = ({ showCatMenu, setShowCatMenu }) => {
                 <BsChevronDown size={14} />
                 {showCatMenu && (
                   <ul className="bg-white absolute top-6 left-0 min-w-[250px] px-1 py-1 text-black shadow-lg">
-                    {subMenuData.map((submenu) => {
+                    {categories?.map(({attributes: c, id}) => {
                       return (
-                        <Link key={submenu.id} href="/" onClick={()=> setShowCatMenu(false)}>
+                        <Link key={id} href={`/category/${c.slug}`} onClick={()=> setShowCatMenu(false)}>
                           <li className="flex justify-between h-12 px-3 item-centers hover:bg-black/[0.03] rounded-md ">
-                            {submenu.name}
-                            <span className="text-sm opacity-50">78</span>
+                            {c.name}
+                            <span className="text-sm opacity-50">{`(${c.products.data.length})`}</span>
                           </li>
                         </Link>
                       );
