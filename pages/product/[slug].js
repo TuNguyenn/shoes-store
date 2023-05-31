@@ -5,21 +5,42 @@ import React, { useState } from 'react';
 import RelatedProducts from '@/components/RelatedProducts';
 import { fetchDataFromApi } from '@/utils/api';
 import { getDiscountedPricePercentage } from '@/utils/helper';
+import ReactMarkdown from 'react-markdown';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCart } from '@/store/cartSlice';
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProductDetails = ({ product, products }) => {
   const [selectedSize, setSelectedSize] = useState();
   const [showError, setShowError] = useState(false);
+  const dispatch = useDispatch();
   const p = product?.data?.[0]?.attributes;
+
+  const notify = () => {
+    toast.success('Success. Check your cart!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'dark',
+    });
+  };
 
   return (
     <div className="w-full md:py-20">
+      <ToastContainer />
       <Wrapper>
         <div className="flex flex-col lg:flex-row md:px-10 gap-[50px] lg:gap-[100px]">
           <div className="w-full md:w-auto flex-[1.5] max-w-[500px] lg:max-w-full mx-auto lg:mx-0">
             <ProductDetailsCarousel images={p.image.data} />
           </div>
           <div className="flex-[1] py-3">
-            <div className="text-[34px] font-semibold mb-2">{p.name}</div>
+            <div className="text-[34px] font-semibold mb-2 leading-tight">{p.name}</div>
             <div className="mb-5 text-lg font-semibold">{p.subtitle}</div>
             <div className="flex items-center">
               <p className="mr-2 text-lg font-semibold">&#8377;{p.price}</p>
@@ -48,7 +69,7 @@ const ProductDetails = ({ product, products }) => {
                   Select Guide
                 </div>
               </div>
-              <div id='sizeGrid' className="grid grid-cols-3 gap-2">
+              <div id="sizeGrid" className="grid grid-cols-3 gap-2">
                 {p.size.data.map((item, i) => (
                   <div
                     key={i}
@@ -80,26 +101,40 @@ const ProductDetails = ({ product, products }) => {
               className="w-full py-4 mb-3 text-lg font-medium text-white transition-transform bg-black rounded-full active:scale-95 hover:opacity-75"
               onClick={() => {
                 if (!selectedSize) {
-                  setShowError(true);
-                  document.getElementById('sizeGrid').scrollIntoView({
-                    block: 'center',
-                    behavior: 'smooth',
-                  });
+                    setShowError(true);
+                    document
+                        .getElementById("sizesGrid")
+                        .scrollIntoView({
+                            block: "center",
+                            behavior: "smooth",
+                        });
+                } else {
+                    dispatch(
+                        addToCart({
+                            ...product?.data?.[0],
+                            selectedSize,
+                            oneQuantityPrice: p.price,
+                        })
+                    );
+                    notify();
                 }
-              }}
+            }}
             >
               Add to Cart
             </button>
-            <button className="flex items-center justify-center w-full gap-2 py-4 text-lg font-medium transition-transform border border-black rounded-full active:scale-95 hover:opacity-75">
+            <button className="flex items-center justify-center w-full gap-2 py-4 mb-5 text-lg font-medium transition-transform border border-black rounded-full active:scale-95 hover:opacity-75">
               Whishlist
               <IoMdHeartEmpty size={20} />
             </button>
             <div>
-              <div className="text-lg font-bold md-5">Product Details</div>
+              <div className="mb-5 text-lg font-bold">Product Details</div>
+              <div className="mb-5 markdown text-md">
+                <ReactMarkdown>{p.decsription}</ReactMarkdown>
+              </div>
             </div>
           </div>
         </div>
-        {/* <RelatedProducts /> */}
+        <RelatedProducts products={products} />
       </Wrapper>
     </div>
   );
